@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Presença</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --primary: #1e3a8a;
+    --primary-hover: #172d6b;
+    --success: #15803d;
+    --success-bg: #dcfce7;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+    --warning: #92400e;
+    --warning-bg: #fef3c7;
+    --info: #1e40af;
+    --info-bg: #dbeafe;
+    --roleta: #7c3aed;
+    --roleta-bg: #ede9fe;
+    --mono-bg: #f8fafc;
+    --aviso-bg: #fef3c7;
+    --aviso-border: #f59e0b;
+    --shadow: 0 2px 10px rgba(0,0,0,0.06);
+    --input-bg: #ffffff;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-alt: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --success: #4ade80;
+    --success-bg: #14532d;
+    --danger: #f87171;
+    --danger-bg: #7f1d1d;
+    --warning: #fbbf24;
+    --warning-bg: #78350f;
+    --info: #60a5fa;
+    --info-bg: #1e3a8a;
+    --roleta: #a78bfa;
+    --roleta-bg: #4c1d95;
+    --mono-bg: #0f172a;
+    --aviso-bg: #78350f;
+    --aviso-border: #fbbf24;
+    --shadow: 0 2px 10px rgba(0,0,0,0.4);
+    --input-bg: #0f172a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+  header p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+  .theme-toggle {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+  }
+  .theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: 0.15s;
+  }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.15); }
+  .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-outline:hover { color: var(--primary); border-color: var(--primary); }
+  .btn-roleta { background: var(--roleta); color: #fff; }
+  .btn-roleta:hover { filter: brightness(1.15); }
+  .btn-mini {
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-mini:hover { color: var(--roleta); border-color: var(--roleta); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: var(--text);
+  }
+  .card h2 span.count {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+  .card.destaque { border-left: 3px solid var(--roleta); }
+  .card.destaque h2 { color: var(--roleta); }
+
+  .aviso {
+    background: var(--aviso-bg);
+    border: 1px solid var(--aviso-border);
+    border-left: 3px solid var(--aviso-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .aviso strong { color: var(--warning); }
+  .aviso code {
+    background: var(--surface);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .aviso.hidden { display: none; }
+
+  .output {
+    background: var(--mono-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    max-height: 500px;
+    overflow-y: auto;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .output.simples {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .output .key { color: var(--info); font-weight: 600; }
+  .output .val { color: var(--text); }
+  .output .entrada { color: var(--success); font-weight: 600; }
+  .output .saida { color: var(--warning); font-weight: 600; }
+  .output .num { color: var(--text-muted); }
+  .output .roleta-sim { color: var(--roleta); font-weight: 600; }
+  .output .roleta-nao { color: var(--text-muted); }
+
+  .vazio {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 30px;
+    font-style: italic;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--surface);
+    padding: 11px 22px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Relatório de Presença</h1>
+      <p>Informações em texto lidas dos dados salvos pelo sistema de controle de presença</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">Modo escuro</button>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn-primary" onclick="atualizar()">🔄 Atualizar dados</button>
+    <button class="btn-roleta" onclick="document.getElementById('inputImport').click()">📂 Importar arquivo .json</button>
+    <input type="file" id="inputImport" accept=".json,application/json" style="display:none" onchange="importarArquivo(event)">
+    <button class="btn-outline" onclick="copiarTudo()">📋 Copiar tudo</button>
+    <button class="btn-outline" onclick="baixarTxt()">⬇️ Baixar como .txt</button>
+  </div>
+
+  <!-- Aviso caso não tenha dados -->
+  <div class="aviso hidden" id="avisoSemDados">
+    <strong>⚠️ Nenhum dado encontrado neste navegador.</strong><br>
+    Se você cadastrou pessoas no <b>Código 1</b>, existem duas formas de trazer os dados para cá:<br><br>
+    <b>Opção A (recomendada):</b> no Código 1, clique em <code>💾 Exportar dados</code> → baixa um arquivo <code>.json</code> → depois clique aqui em <code>📂 Importar arquivo .json</code> e selecione esse arquivo.<br><br>
+    <b>Opção B:</b> abra os dois arquivos pelo mesmo servidor local (ex: <code>python -m http.server</code>) para que o <code>localStorage</code> seja compartilhado automaticamente.
+  </div>
+
+  <div class="card">
+    <h2>Pessoas cadastradas <span class="count" id="countPessoas">0</span></h2>
+    <div class="output" id="outPessoas"></div>
+  </div>
+
+  <div class="card">
+    <h2>Histórico de registros <span class="count" id="countHistorico">0</span></h2>
+    <div class="output" id="outHistorico"></div>
+  </div>
+
+  <!-- Caixa especial: nome - turma -->
+  <div class="card destaque">
+    <h2>
+      🎰 Lista simples: nome - turma
+      <span class="count" id="countSimples">0</span>
+    </h2>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn-mini" onclick="copiarSimples()">📋 Copiar esta lista</button>
+      <button class="btn-mini" onclick="copiarSimplesRoleta()">🎰 Copiar só os da roleta</button>
+    </div>
+    <div class="output simples" id="outSimples"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================= TEMA =================
+function aplicarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema);
+  document.getElementById('themeBtn').textContent = tema === 'dark' ? 'Modo claro' : 'Modo escuro';
+  localStorage.setItem('relatorio_tema', tema);
+}
+function toggleTheme() {
+  const atual = document.documentElement.getAttribute('data-theme');
+  aplicarTema(atual === 'dark' ? 'light' : 'dark');
+}
+
+// ================= LEITURA DOS DADOS =================
+function lerDados() {
+  let pessoas = [];
+  let historico = [];
+  try {
+    const rawP = localStorage.getItem('presenca_pessoas');
+    const rawH = localStorage.getItem('presenca_historico');
+    pessoas = rawP ? JSON.parse(rawP) : [];
+    historico = rawH ? JSON.parse(rawH) : [];
+    if (!Array.isArray(pessoas)) pessoas = [];
+    if (!Array.isArray(historico)) historico = [];
+  } catch (e) {
+    console.warn('Erro ao ler localStorage:', e);
+  }
+  // compatibilidade com dados antigos (sem campo roleta)
+  pessoas = pessoas.map(p => ({ roleta: false, ...p }));
+  return { pessoas, historico };
+}
+
+// ================= UTIL =================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ================= IMPORTAÇÃO =================
+function importarArquivo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const dados = JSON.parse(ev.target.result);
+      let ok = false;
+      if (Array.isArray(dados.pessoas)) {
+        localStorage.setItem('presenca_pessoas', JSON.stringify(dados.pessoas));
+        ok = true;
+      }
+      if (Array.isArray(dados.historico)) {
+        localStorage.setItem('presenca_historico', JSON.stringify(dados.historico));
+        ok = true;
+      }
+      // também aceita caso o JSON seja direto um array de pessoas
+      if (!ok && Array.isArray(dados)) {
+        localStorage.setItem('presenca_pessoas', JSON.stringify(dados));
+        ok = true;
+      }
+      if (ok) {
+        render();
+        toast('Dados importados com sucesso!');
+      } else {
+        toast('Arquivo inválido ou vazio.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Erro ao ler o arquivo. Verifique se é um JSON válido.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // permite reimportar o mesmo arquivo
+}
+
+// ================= FORMATAÇÃO =================
+function formatarPessoa(p, i) {
+  return [
+    `<span class="num">── Pessoa ${i + 1} ──</span>`,
+    `<span class="key">nome</span> = <span class="val">${p.nome}</span>`,
+    `<span class="key">turma</span> = <span class="val">${p.turma}</span>`,
+    `<span class="key">status</span> = <span class="val">${p.dentro ? 'Na sala (presente)' : 'Fora da sala'}</span>`,
+    `<span class="key">roleta</span> = <span class="${p.roleta ? 'roleta-sim' : 'roleta-nao'}">${p.roleta ? '🎰 Sim (participa)' : 'Não'}</span>`,
+    `<span class="key">ultima_entrada</span> = <span class="val">${p.ultimaEntrada || '—'}</span>`,
+    `<span class="key">ultima_saida</span> = <span class="val">${p.ultimaSaida || '—'}</span>`,
+    ''
+  ].join('\n');
+}
+
+function formatarEvento(h, i) {
+  const classe = h.evento === 'ENTRADA' ? 'entrada' : 'saida';
+  return [
+    `<span class="num">── Registro ${i + 1} ──</span>`,
+    `<span class="key">nome</span> = <span class="val">${h.nome}</span>`,
+    `<span class="key">turma</span> = <span class="val">${h.turma}</span>`,
+    `<span class="key">evento</span> = <span class="${classe}">${h.evento}</span>`,
+    `<span class="key">data</span> = <span class="val">${h.data}</span>`,
+    `<span class="key">hora</span> = <span class="val">${h.hora}</span>`,
+    ''
+  ].join('\n');
+}
+
+// ================= RENDER =================
+let textoPessoas = '';
+let textoHistorico = '';
+let textoSimples = '';
+let textoSimplesRoleta = '';
+
+function render() {
+  const { pessoas, historico } = lerDados();
+
+  // Aviso se estiver tudo vazio
+  const aviso = document.getElementById('avisoSemDados');
+  if (pessoas.length === 0 && historico.length === 0) {
+    aviso.classList.remove('hidden');
+  } else {
+    aviso.classList.add('hidden');
+  }
+
+  document.getElementById('countPessoas').textContent = pessoas.length;
+  document.getElementById('countHistorico').textContent = historico.length;
+
+  // --- PESSOAS ---
+  const outP = document.getElementById('outPessoas');
+  if (pessoas.length === 0) {
+    outP.innerHTML = '<p class="vazio">Nenhuma pessoa cadastrada nos dados salvos.</p>';
+    textoPessoas = 'Nenhuma pessoa cadastrada.';
+  } else {
+    textoPessoas = pessoas.map((p, i) =>
+      `── Pessoa ${i + 1} ──\n` +
+      `nome = ${p.nome}\n` +
+      `turma = ${p.turma}\n` +
+      `status = ${p.dentro ? 'Na sala (presente)' : 'Fora da sala'}\n` +
+      `roleta = ${p.roleta ? 'Sim (participa)' : 'Não'}\n` +
+      `ultima_entrada = ${p.ultimaEntrada || '—'}\n` +
+      `ultima_saida = ${p.ultimaSaida || '—'}\n`
+    ).join('\n');
+    outP.innerHTML = pessoas.map(formatarPessoa).join('\n');
+  }
+
+  // --- HISTÓRICO ---
+  const outH = document.getElementById('outHistorico');
+  if (historico.length === 0) {
+    outH.innerHTML = '<p class="vazio">Nenhum registro no histórico.</p>';
+    textoHistorico = 'Nenhum registro no histórico.';
+  } else {
+    textoHistorico = historico.map((h, i) =>
+      `── Registro ${i + 1} ──\n` +
+      `nome = ${h.nome}\n` +
+      `turma = ${h.turma}\n` +
+      `evento = ${h.evento}\n` +
+      `data = ${h.data}\n` +
+      `hora = ${h.hora}\n`
+    ).join('\n');
+    outH.innerHTML = historico.map(formatarEvento).join('\n');
+  }
+
+  // --- LISTA SIMPLES (nome - turma) ---
+  const outS = document.getElementById('outSimples');
+  const countS = document.getElementById('countSimples');
+  if (pessoas.length === 0) {
+    outS.innerHTML = '<p class="vazio">Nenhuma pessoa cadastrada.</p>';
+    textoSimples = '';
+    textoSimplesRoleta = '';
+    countS.textContent = '0';
+  } else {
+    const ordenadas = [...pessoas].sort((a, b) => a.nome.localeCompare(b.nome));
+    textoSimples = ordenadas.map(p => `${p.nome} - ${p.turma}`).join('\n');
+    textoSimplesRoleta = ordenadas.filter(p => p.roleta).map(p => `${p.nome} - ${p.turma}`).join('\n');
+
+    outS.innerHTML = ordenadas.map(p => {
+      const marcador = p.roleta ? '🎰 ' : '&nbsp;&nbsp;&nbsp;';
+      return `${marcador}${p.nome} - ${p.turma}`;
+    }).join('\n');
+    const qtdRoleta = ordenadas.filter(p => p.roleta).length;
+    countS.textContent = `${ordenadas.length} (${qtdRoleta} na roleta)`;
+  }
+}
+
+// ================= AÇÕES =================
+function atualizar() {
+  render();
+  toast('Dados atualizados.');
+}
+
+function textoCompleto() {
+  const data = new Date().toLocaleString('pt-BR');
+  return (
+    `RELATÓRIO DE PRESENÇA\n` +
+    `Gerado em: ${data}\n` +
+    `==========================================\n\n` +
+    `PESSOAS CADASTRADAS\n` +
+    `------------------------------------------\n` +
+    (textoPessoas || 'Nenhuma pessoa cadastrada.') + `\n\n` +
+    `HISTÓRICO DE REGISTROS\n` +
+    `------------------------------------------\n` +
+    (textoHistorico || 'Nenhum registro no histórico.') + `\n\n` +
+    `LISTA SIMPLES (nome - turma)\n` +
+    `------------------------------------------\n` +
+    (textoSimples || 'Nenhuma pessoa cadastrada.') + '\n'
+  );
+}
+
+function copiar(texto, msg) {
+  if (!texto) { toast('Nada para copiar.'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto)
+      .then(() => toast(msg || 'Copiado!'))
+      .catch(() => copiarFallback(texto, msg));
+  } else {
+    copiarFallback(texto, msg);
+  }
+}
+function copiarFallback(texto, msg) {
+  const ta = document.createElement('textarea');
+  ta.value = texto;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); toast(msg || 'Copiado!'); }
+  catch (e) { toast('Não foi possível copiar.'); }
+  document.body.removeChild(ta);
+}
+
+function copiarTudo() { copiar(textoCompleto(), 'Relatório completo copiado!'); }
+function copiarSimples() { copiar(textoSimples, 'Lista "nome - turma" copiada!'); }
+function copiarSimplesRoleta() {
+  if (!textoSimplesRoleta) { toast('Ninguém marcado na roleta.'); return; }
+  copiar(textoSimplesRoleta, 'Lista da roleta copiada!');
+}
+
+function baixarTxt() {
+  const texto = textoCompleto();
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  a.href = url;
+  a.download = `relatorio-presenca-${data}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Arquivo baixado.');
+}
+
+// ================= INICIAR =================
+aplicarTema(localStorage.getItem('relatorio_tema') || 'light');
+render();
+</script>
+</body>
+</html>

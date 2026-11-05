@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Presença</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --primary: #1e3a8a;
+    --primary-hover: #172d6b;
+    --success: #15803d;
+    --success-bg: #dcfce7;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+    --warning: #92400e;
+    --warning-bg: #fef3c7;
+    --info: #1e40af;
+    --info-bg: #dbeafe;
+    --roleta: #7c3aed;
+    --roleta-bg: #ede9fe;
+    --shadow: 0 2px 10px rgba(0,0,0,0.06);
+    --input-bg: #ffffff;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-alt: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --success: #4ade80;
+    --success-bg: #14532d;
+    --danger: #f87171;
+    --danger-bg: #7f1d1d;
+    --warning: #fbbf24;
+    --warning-bg: #78350f;
+    --info: #60a5fa;
+    --info-bg: #1e3a8a;
+    --roleta: #a78bfa;
+    --roleta-bg: #4c1d95;
+    --shadow: 0 2px 10px rgba(0,0,0,0.4);
+    --input-bg: #0f172a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .container { max-width: 1150px; margin: 0 auto; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  }
+  header h1 { font-size: 22px; color: var(--text); font-weight: 600; letter-spacing: -0.3px; }
+  header p { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+  .theme-toggle {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+  .card {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .card h2 {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .grid { display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+  input[type="text"] {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    background: var(--input-bg);
+    color: var(--text);
+    transition: 0.2s;
+  }
+  input[type="text"]::placeholder { color: var(--text-muted); }
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  /* Checkbox da roleta */
+  .roleta-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.15s;
+  }
+  .roleta-opt:hover { border-color: var(--roleta); }
+  .roleta-opt input { display: none; }
+  .roleta-opt .box {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: 0.15s;
+    background: var(--input-bg);
+  }
+  .roleta-opt .box::after {
+    content: '✓';
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: 0.15s;
+  }
+  .roleta-opt input:checked + .box {
+    background: var(--roleta);
+    border-color: var(--roleta);
+  }
+  .roleta-opt input:checked + .box::after { opacity: 1; transform: scale(1); }
+  .roleta-opt .lbl { font-size: 13px; color: var(--text); font-weight: 500; }
+  .roleta-opt .lbl small { display: block; color: var(--text-muted); font-weight: 400; font-size: 11px; margin-top: 1px; }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { filter: brightness(1.1); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { filter: brightness(1.1); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { color: var(--danger); border-color: var(--danger); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    padding: 16px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  .stat.verde { border-left-color: var(--success); }
+  .stat.vermelho { border-left-color: var(--danger); }
+  .stat.roxo { border-left-color: var(--roleta); }
+  .stat .num { font-size: 26px; font-weight: 700; line-height: 1; color: var(--text); }
+  .stat .label { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    padding: 11px 10px;
+    text-align: left;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  th {
+    background: var(--surface-alt);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  tbody tr:hover { background: var(--surface-alt); }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge-dentro { background: var(--success-bg); color: var(--success); }
+  .badge-fora   { background: var(--danger-bg);  color: var(--danger); }
+  .badge-entrada{ background: var(--info-bg);    color: var(--info); }
+  .badge-saida  { background: var(--warning-bg); color: var(--warning); }
+  .badge-roleta { background: var(--roleta-bg);  color: var(--roleta); }
+  .badge-sem    { background: var(--surface-alt); color: var(--text-muted); }
+
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px;
+    font-size: 13px;
+  }
+
+  .filtro { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .filtro input { max-width: 280px; }
+
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    border-radius: 10px;
+    max-width: 380px;
+    width: 100%;
+  }
+  .modal p { margin-bottom: 18px; color: var(--text); font-size: 14px; line-height: 1.5; }
+  .modal .actions { justify-content: flex-end; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Controle de Presença</h1>
+      <p>Registro de entradas e saídas com data e hora automáticas</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">Modo escuro</button>
+  </header>
+
+  <!-- Cadastro -->
+  <div class="card">
+    <h2>Cadastrar pessoa</h2>
+    <div class="grid">
+      <input type="text" id="nomePessoa" placeholder="Nome completo" maxlength="60">
+      <input type="text" id="turmaPessoa" placeholder="Turma (ex: 3º Ano A)" maxlength="30">
+      <button class="btn-primary" onclick="cadastrarPessoa()">Cadastrar</button>
+    </div>
+
+    <!-- Opção da roleta -->
+    <label class="roleta-opt" for="chkRoleta">
+      <input type="checkbox" id="chkRoleta">
+      <span class="box"></span>
+      <span class="lbl">
+        🎰 Participar da roleta de prêmios
+        <small>Marque se a pessoa deseja concorrer a um prêmio</small>
+      </span>
+    </label>
+  </div>
+
+  <!-- Estatísticas -->
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Total cadastrados</div></div>
+    <div class="stat verde"><div class="num" id="statDentro">0</div><div class="label">Presentes agora</div></div>
+    <div class="stat vermelho"><div class="num" id="statFora">0</div><div class="label">Fora da sala</div></div>
+    <div class="stat roxo"><div class="num" id="statRoleta">0</div><div class="label">Na roleta</div></div>
+  </div>
+
+  <!-- Lista de pessoas -->
+  <div class="card">
+    <h2>Pessoas cadastradas</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Turma</th>
+            <th>Status</th>
+            <th>Roleta</th>
+            <th>Última entrada</th>
+            <th>Última saída</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaPessoas"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="vazioPessoas">Nenhuma pessoa cadastrada. Comece cadastrando acima.</p>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card">
+    <h2>Histórico de registros</h2>
+    <div class="filtro">
+      <input type="text" id="buscaHistorico" placeholder="Buscar por nome ou turma..." oninput="renderHistorico()">
+      <button class="btn-outline btn-sm" onclick="abrirModalLimpar()">Limpar histórico</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Turma</th>
+            <th>Evento</th>
+            <th>Data</th>
+            <th>Hora</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaHistorico"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="vazioHistorico">Nenhum registro ainda.</p>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalLimpar">
+  <div class="modal">
+    <p>Deseja apagar todo o histórico? Esta ação não pode ser desfeita.</p>
+    <div class="actions">
+      <button class="btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-danger" onclick="limparHistorico()">Apagar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================= TEMA =================
+function aplicarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema);
+  document.getElementById('themeBtn').textContent = tema === 'dark' ? 'Modo claro' : 'Modo escuro';
+  localStorage.setItem('presenca_tema', tema);
+}
+function toggleTheme() {
+  const atual = document.documentElement.getAttribute('data-theme');
+  aplicarTema(atual === 'dark' ? 'light' : 'dark');
+}
+
+// ================= DADOS =================
+let pessoas = JSON.parse(localStorage.getItem('presenca_pessoas')) || [];
+let historico = JSON.parse(localStorage.getItem('presenca_historico')) || [];
+
+// Compatibilidade: se dados antigos não tiverem 'roleta', define como false
+pessoas = pessoas.map(p => ({ roleta: false, ...p }));
+
+function salvar() {
+  localStorage.setItem('presenca_pessoas', JSON.stringify(pessoas));
+  localStorage.setItem('presenca_historico', JSON.stringify(historico));
+}
+
+// ================= UTIL =================
+function agora() {
+  const d = new Date();
+  return { data: d.toLocaleDateString('pt-BR'), hora: d.toLocaleTimeString('pt-BR') };
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+function escape(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ================= CADASTRAR =================
+function cadastrarPessoa() {
+  const nome = document.getElementById('nomePessoa').value.trim();
+  const turma = document.getElementById('turmaPessoa').value.trim();
+  const roleta = document.getElementById('chkRoleta').checked;
+  if (!nome || !turma) { toast('Preencha nome e turma.'); return; }
+  if (pessoas.some(p => p.nome.toLowerCase() === nome.toLowerCase() && p.turma.toLowerCase() === turma.toLowerCase())) {
+    toast('Essa pessoa já está cadastrada nessa turma.'); return;
+  }
+  pessoas.push({ id: Date.now(), nome, turma, roleta, dentro: false, ultimaEntrada: null, ultimaSaida: null });
+  document.getElementById('nomePessoa').value = '';
+  document.getElementById('turmaPessoa').value = '';
+  document.getElementById('chkRoleta').checked = false;
+  salvar(); render();
+  toast('Pessoa cadastrada: ' + nome + (roleta ? ' (na roleta 🎰)' : ''));
+}
+
+// ================= ENTRADA / SAÍDA =================
+function marcarEntrada(id) {
+  const p = pessoas.find(x => x.id === id);
+  if (!p) return;
+  if (p.dentro) { toast(p.nome + ' já está na sala.'); return; }
+  const t = agora();
+  p.dentro = true;
+  p.ultimaEntrada = t.data + ' ' + t.hora;
+  historico.unshift({ nome: p.nome, turma: p.turma, evento: 'ENTRADA', data: t.data, hora: t.hora });
+  salvar(); render();
+  toast('Entrada registrada: ' + p.nome);
+}
+function marcarSaida(id) {
+  const p = pessoas.find(x => x.id === id);
+  if (!p) return;
+  if (!p.dentro) { toast(p.nome + ' não está na sala.'); return; }
+  const t = agora();
+  p.dentro = false;
+  p.ultimaSaida = t.data + ' ' + t.hora;
+  historico.unshift({ nome: p.nome, turma: p.turma, evento: 'SAÍDA', data: t.data, hora: t.hora });
+  salvar(); render();
+  toast('Saída registrada: ' + p.nome);
+}
+
+// ================= ROLETA =================
+function toggleRoleta(id) {
+  const p = pessoas.find(x => x.id === id);
+  if (!p) return;
+  p.roleta = !p.roleta;
+  salvar(); render();
+  toast(p.nome + (p.roleta ? ' entrou na roleta 🎰' : ' saiu da roleta'));
+}
+
+// ================= REMOVER =================
+function removerPessoa(id) {
+  const p = pessoas.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm('Remover "' + p.nome + '" da lista?')) return;
+  pessoas = pessoas.filter(x => x.id !== id);
+  salvar(); render();
+  toast('Removido: ' + p.nome);
+}
+
+// ================= HISTÓRICO =================
+function abrirModalLimpar() {
+  if (historico.length === 0) { toast('O histórico já está vazio.'); return; }
+  document.getElementById('modalLimpar').classList.add('show');
+}
+function fecharModal() { document.getElementById('modalLimpar').classList.remove('show'); }
+function limparHistorico() {
+  historico = []; salvar(); render(); fecharModal();
+  toast('Histórico apagado.');
+}
+
+// ================= RENDER =================
+function render() { renderStats(); renderPessoas(); renderHistorico(); }
+
+function renderStats() {
+  const total = pessoas.length;
+  const dentro = pessoas.filter(p => p.dentro).length;
+  const roleta = pessoas.filter(p => p.roleta).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDentro').textContent = dentro;
+  document.getElementById('statFora').textContent = total - dentro;
+  document.getElementById('statRoleta').textContent = roleta;
+}
+
+function renderPessoas() {
+  const tbody = document.getElementById('tabelaPessoas');
+  const vazio = document.getElementById('vazioPessoas');
+  if (pessoas.length === 0) { tbody.innerHTML = ''; vazio.style.display = 'block'; return; }
+  vazio.style.display = 'none';
+
+  const ordenadas = [...pessoas].sort((a, b) => {
+    if (a.dentro !== b.dentro) return a.dentro ? -1 : 1;
+    return a.nome.localeCompare(b.nome);
+  });
+
+  tbody.innerHTML = ordenadas.map(p => `
+    <tr>
+      <td><strong>${escape(p.nome)}</strong></td>
+      <td>${escape(p.turma)}</td>
+      <td><span class="badge ${p.dentro ? 'badge-dentro' : 'badge-fora'}">${p.dentro ? 'Na sala' : 'Fora'}</span></td>
+      <td>
+        <button class="badge ${p.roleta ? 'badge-roleta' : 'badge-sem'}" style="border:none;cursor:pointer;" onclick="toggleRoleta(${p.id})" title="Clique para alternar">
+          ${p.roleta ? '🎰 Sim' : 'Não'}
+        </button>
+      </td>
+      <td>${p.ultimaEntrada || '—'}</td>
+      <td>${p.ultimaSaida || '—'}</td>
+      <td>
+        <div class="actions">
+          ${p.dentro
+            ? `<button class="btn-danger btn-sm" onclick="marcarSaida(${p.id})">Registrar saída</button>`
+            : `<button class="btn-success btn-sm" onclick="marcarEntrada(${p.id})">Registrar entrada</button>`}
+          <button class="btn-outline btn-sm" onclick="removerPessoa(${p.id})">Remover</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderHistorico() {
+  const tbody = document.getElementById('tabelaHistorico');
+  const vazio = document.getElementById('vazioHistorico');
+  const busca = (document.getElementById('buscaHistorico').value || '').toLowerCase().trim();
+  const filtrado = historico.filter(h =>
+    !busca || h.nome.toLowerCase().includes(busca) || h.turma.toLowerCase().includes(busca)
+  );
+  if (filtrado.length === 0) {
+    tbody.innerHTML = '';
+    vazio.style.display = 'block';
+    vazio.textContent = historico.length === 0 ? 'Nenhum registro ainda.' : 'Nenhum resultado para a busca.';
+    return;
+  }
+  vazio.style.display = 'none';
+  tbody.innerHTML = filtrado.slice(0, 200).map(h => `
+    <tr>
+      <td>${escape(h.nome)}</td>
+      <td>${escape(h.turma)}</td>
+      <td><span class="badge ${h.evento === 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}">${h.evento}</span></td>
+      <td>${h.data}</td>
+      <td>${h.hora}</td>
+    </tr>
+  `).join('');
+}
+
+// ================= TECLADO =================
+document.getElementById('turmaPessoa').addEventListener('keypress', e => { if (e.key === 'Enter') cadastrarPessoa(); });
+document.getElementById('nomePessoa').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('turmaPessoa').focus(); });
+
+// ================= INICIAR =================
+aplicarTema(localStorage.getItem('presenca_tema') || 'light');
+render();
+</script>
+</body>
+</html>
